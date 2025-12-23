@@ -3,7 +3,7 @@
 Interactive, browser-based graphing calculator for plotting explicit and implicit
 equations on a responsive canvas. Includes pan/zoom, axis ticks, and implicit
 contour rendering (marching squares).
-
+Live Demo: [https://akhilsirvi.github.io/graphing-calculator/src/](https://akhilsirvi.github.io/graphing-calculator/src/)
 ![Status](https://img.shields.io/badge/status-in_development-orange)
 
 ## Features
