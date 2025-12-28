@@ -1,0 +1,231 @@
+*{
+    padding: 0px;
+    margin: 0px;
+}
+body{
+    font-family: 'Sofia Sans', sans-serif;
+    width: 100%;
+    height: 100vh;
+}
+/* accessibility helper */
+.visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap;border:0;padding:0;margin:-1px}
+:root{
+    --main-color: #ecf5ff;
+}
+#container{
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+    background-color: var(--main-color);
+}
+#main{display:flex;flex:1 1 auto;gap:12px;align-items:stretch}
+
+#graph_page{
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.12);
+    background: white;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#graph_page, #new_graph_page { min-height: 0; }
+#new_graph_page { flex: 1 1 auto; display: flex; align-items: stretch; }
+#user_input_section{
+    width: 360px;
+    max-width: 40%;
+    height: 100%;
+    background-color: var(--main-color);
+    box-sizing: border-box;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 12px;
+    border-left: 1px solid rgba(0,0,0,0.06);
+}
+
+.function-input{
+    width: 100%;
+    height: 50px;
+    margin: 8px 0;
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid rgb(143, 143, 143);
+    box-shadow: 0px 0px 5px rgb(138, 138, 138);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding: 6px;
+}
+.function-input label{
+    display:flex;align-items:center;gap:6px;margin-left:8px
+}
+.function-input .fn-label{font-weight:700;color:#fff;padding:6px 10px;background:#2192ff;border-radius:6px}
+.function-input .fn-index{font-size:12px;color:#333}
+
+#function_input_1 div:nth-child(1){
+    color: white;
+    font-style: italic;
+    font-family: fangsong;
+    background-color: rgb(33 146 255);
+    width: 50px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    box-sizing: border-box;
+}
+#function_input_1 div:nth-child(2) > input[type=text],
+#function_input_2 div:nth-child(2) > input[type=text]{
+    outline: none;
+    border: 1px solid rgb(184, 184, 184);
+    box-shadow: 0px 0px 5px rgb(138, 138, 138);
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    padding: 5px;
+    box-sizing: border-box;
+    font-size: 20px;
+    font-weight: 100;
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+
+}
+ #function_input_1 div:nth-child(2){
+    margin: 5px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+#function_input_2 div:nth-child(1){
+    color: white;
+    font-style: italic;
+    font-family: fangsong;
+    background-color: rgb(33 146 255);
+    width: 50px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    box-sizing: border-box;
+}
+#function_input_2 div:nth-child(2) > input[type=text]{
+    outline: none;
+    border: 1px solid rgb(184, 184, 184);
+    box-shadow: 0px 0px 5px rgb(138, 138, 138);
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    padding: 5px;
+    box-sizing: border-box;
+    font-size: 20px;
+    font-weight: 100;
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+}
+#function-input label{display:flex;align-items:center;gap:6px}
+#function-input .fn-label{font-weight:700;color:#fff;padding:6px 10px;background:#2192ff;border-radius:6px}
+#function-input .fn-index{font-size:12px;color:#333}
+#function_input_2 div:nth-child(2){
+    margin: 5px;
+    box-sizing: border-box;
+    width: 100%;
+}
+#bottom_align{
+font-size: 10px;
+margin-top: 10px;
+}
+
+#user_button_section{
+    width: 100%;
+    background-color: transparent;
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+}
+#user_button_section div{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-sizing: border-box;
+    
+}
+
+#user_button_section div button{
+    padding: 10px 12px;
+    margin: 4px;
+    min-width: 54px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.12);
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+}
+
+#user_button_section div button[type="button"]{
+    background: linear-gradient(180deg,#fff,#f2f6ff);
+    cursor: pointer;
+}
+#user_button_section div button[type="button"]:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:8px}
+.title{font-size:20px;font-weight:700;color:#0b3a66}
+.subtitle{font-size:13px;color:#3d5568}
+
+#new_graph_page{
+        overflow: auto;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+}
+
+/* make inputs and buttons responsive on small screens */
+@media (max-width: 720px){
+    #container{flex-direction:column}
+    #user_input_section{width:100%;max-width:100%;height:auto}
+    #graph_page{width:100%;height:60vh}
+}
+
+/* Additional responsive rules for medium and small screens */
+@media (max-width: 900px) {
+    #main { gap: 10px; }
+    #user_input_section { width: 320px; max-width: 35%; padding: 10px; }
+    #graph_page { min-height: 420px; }
+}
+
+@media (max-width: 720px) {
+    /* stack controls under the graph on small screens */
+    #main { flex-direction: column-reverse; align-items: stretch; }
+    #graph_page { height: 55vh; min-height: 320px; }
+    #user_input_section { width: 100%; max-width: 100%; border-left: none; border-top: 1px solid rgba(0,0,0,0.06); }
+    .function-input { height: 48px; }
+    #user_button_section div { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    #user_button_section div button { flex: 1 1 30%; min-width: 88px; }
+    .title { font-size: 18px; }
+    .subtitle { font-size: 12px; }
+}
+
+@media (max-width: 420px) {
+    .title { font-size: 16px; }
+    .subtitle { font-size: 11px; }
+    #user_button_section div button { min-width: 72px; padding: 8px 10px; font-size: 14px; }
+    #function_input_1 div:nth-child(2) > input[type=text], #function_input_2 div:nth-child(2) > input[type=text] { font-size: 16px; }
+}
+
+/* Make sure interactive elements are reachable on touch devices */
+button, input { touch-action: manipulation; }
