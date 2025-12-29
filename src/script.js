@@ -205,10 +205,12 @@
       expr = expr.replace(/\bln\b/g, "Math.log");
       expr = expr.replace(/\bpi\b/gi, "Math.PI");
       expr = expr.replace(/\be\b/g, "Math.E");
-      expr = expr.replace(
-        /\b(sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|abs|floor|ceil|sqrt|log|max|min|pow|exp)\s*\(/g,
-        "Math.$1("
-      );
+      // support reciprocal trig functions (csc/sec/cot)
+      expr = expr.replace(/\bcsc\s*\(/g, "1/Math.sin(");
+      expr = expr.replace(/\bsec\s*\(/g, "1/Math.cos(");
+      expr = expr.replace(/\bcot\s*\(/g, "1/Math.tan(");
+      // prefix common functions with Math., but avoid double-prefixing Math.*
+      expr = expr.replace(/(?<!Math\.)\b(sin|cos|tan|csc|sec|cot|asin|acos|atan|sinh|cosh|tanh|abs|floor|ceil|sqrt|log|max|min|pow|exp)\s*\(/g, "Math.$1(");
       try {
         return new Function("x", "y", "return (" + expr + ");");
       } catch (err) {
@@ -259,7 +261,8 @@
         const x2 = xmin + (i2 / cols) * (xmax - xmin);
         const y2 = ymin + (j2 / rows) * (ymax - ymin);
         if (!isFinite(v1) || !isFinite(v2))
-          return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
+          // return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
+          return null;
         const t = v1 / (v1 - v2);
         return { x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t };
       }
@@ -325,6 +328,7 @@
           segs.forEach((pair) => {
             const pA = edges[pair[0]];
             const pB = edges[pair[1]];
+            if (!pA || !pB) return;
             const a = worldToPixel(pA.x, pA.y);
             const b = worldToPixel(pB.x, pB.y);
             ctx.moveTo(a.px + 0.5, a.py + 0.5);
@@ -341,10 +345,11 @@
       expr = expr.replace(/\bln\b/g, "Math.log");
       expr = expr.replace(/\bpi\b/gi, "Math.PI");
       expr = expr.replace(/\be\b/g, "Math.E");
-      expr = expr.replace(
-        /\b(sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|abs|floor|ceil|sqrt|log|max|min|pow|exp)\s*\(/g,
-        "Math.$1("
-      );
+      // support reciprocal trig functions (csc/sec/cot)
+      expr = expr.replace(/\bcsc\s*\(/g, "1/Math.sin(");
+      expr = expr.replace(/\bsec\s*\(/g, "1/Math.cos(");
+      expr = expr.replace(/\bcot\s*\(/g, "1/Math.tan(");
+      expr = expr.replace(/(?<!Math\.)\b(sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|abs|floor|ceil|sqrt|log|max|min|pow|exp)\s*\(/g, "Math.$1(");
       try {
         return new Function("x", "return (" + expr + ");");
       } catch (err) {
@@ -360,21 +365,93 @@
     const canvas = ctx.canvas;
     const w = canvas.width / (window.devicePixelRatio || 1);
     const samples = Math.max(400, Math.floor(w));
+    // sampling configuration (tweak these to change quality/performance)
+    const samplingConfig = {
+      initialSegmentsFactor: 4, // initialSegments = Math.floor(wpx / factor)
+      samplesPerUnit: 6, // additional samples per world unit when zoomed out
+      maxDepth: 12,
+      pixelTolerance: 1.0,
+      maxPoints: 50000,
+    };
     const xmin = viewport.xmin;
     const xmax = viewport.xmax;
 
     function sampleValues(fn) {
+      // adaptive subdivision sampling
       const vals = [];
-      for (let i = 0; i < samples; i++) {
-        const x = xmin + (i / (samples - 1)) * (xmax - xmin);
-        let y;
+      const canvas = ctx.canvas;
+      const wpx = canvas.width / (window.devicePixelRatio || 1);
+      const hpx = canvas.height / (window.devicePixelRatio || 1);
+        // scale initial segments by canvas pixels and world span
+        const initialSegments = Math.max(
+          200,
+          Math.floor(wpx / samplingConfig.initialSegmentsFactor),
+          Math.ceil((xmax - xmin) * samplingConfig.samplesPerUnit)
+        );
+        const maxDepth = samplingConfig.maxDepth; // recursion depth per segment
+        const pixelTolerance = samplingConfig.pixelTolerance; // acceptable pixel error in px
+        const maxPoints = samplingConfig.maxPoints; // safety cap
+
+      function safeEval(x) {
         try {
-          y = fn(x);
+          const y = fn(x);
+          return isFinite(y) ? y : NaN;
         } catch (e) {
-          y = NaN;
+          return NaN;
         }
-        if (!isFinite(y)) y = NaN;
-        vals.push({ x, y });
+      }
+
+      function refine(x0, y0, x1, y1, depth) {
+        // always include x0,y0; refinement will add x1,y1 when appropriate
+        const out = [];
+        const xm = 0.5 * (x0 + x1);
+        const ym = safeEval(xm);
+        // if any endpoint or midpoint is NaN or we've reached max depth, don't subdivide
+        if (!isFinite(y0) || !isFinite(y1) || !isFinite(ym) || depth >= maxDepth) {
+          out.push({ x: x0, y: y0 });
+          out.push({ x: x1, y: y1 });
+          return out;
+        }
+        // compute pixel error between actual midpoint and linear midpoint
+        const pMid = worldToPixel(xm, ym);
+        const pLin = worldToPixel(xm, (y0 + y1) / 2);
+        const err = Math.hypot(pMid.px - pLin.px, pMid.py - pLin.py);
+        if (err <= pixelTolerance) {
+          out.push({ x: x0, y: y0 });
+          out.push({ x: x1, y: y1 });
+          return out;
+        }
+        // subdivide
+        const left = refine(x0, y0, xm, ym, depth + 1);
+        const right = refine(xm, ym, x1, y1, depth + 1);
+        // merge, avoid duplicate midpoint
+        left.pop();
+        return left.concat(right);
+      }
+
+      // build initial coarse samples and refine per segment
+      let totalPoints = 0;
+      let prev = null;
+      for (let i = 0; i < initialSegments; i++) {
+        const x0 = xmin + (i / initialSegments) * (xmax - xmin);
+        const x1 = xmin + ((i + 1) / initialSegments) * (xmax - xmin);
+        const y0 = safeEval(x0);
+        const y1 = safeEval(x1);
+        const seg = refine(x0, y0, x1, y1, 0);
+        // append segment, avoiding duplicate at join
+        for (let j = 0; j < seg.length; j++) {
+          const pt = seg[j];
+          if (prev && Math.abs(pt.x - prev.x) < 1e-15) continue;
+          vals.push(pt);
+          prev = pt;
+          totalPoints++;
+          if (totalPoints > maxPoints) break;
+        }
+        if (totalPoints > maxPoints) break;
+      }
+      // ensure last sample at xmax is present
+      if (!vals.length || Math.abs(vals[vals.length - 1].x - xmax) > 1e-12) {
+        vals.push({ x: xmax, y: safeEval(xmax) });
       }
       return vals;
     }
@@ -406,20 +483,32 @@
       ctx.beginPath();
       ctx.lineWidth = 2;
       ctx.strokeStyle = color;
-      let started = false;
-      vals.forEach((pt) => {
+      // threshold in pixels to decide when to break the path
+      const canvas = ctx.canvas;
+      const h = canvas.height / (window.devicePixelRatio || 1);
+      const maxGap = Math.max(40, h * 0.25);
+      let prev = null;
+      for (let i = 0; i < vals.length; i++) {
+        const pt = vals[i];
         if (!isFinite(pt.y)) {
-          started = false;
-          return;
+          prev = null;
+          continue;
         }
         const { px, py } = worldToPixel(pt.x, pt.y);
-        if (!started) {
+        if (!prev) {
           ctx.moveTo(px + 0.5, py + 0.5);
-          started = true;
+          prev = { px, py };
+          continue;
+        }
+        const dy = Math.abs(py - prev.py);
+        // if gap too large (likely an asymptote) start a new subpath
+        if (dy > maxGap) {
+          ctx.moveTo(px + 0.5, py + 0.5);
         } else {
           ctx.lineTo(px + 0.5, py + 0.5);
         }
-      });
+        prev = { px, py };
+      }
       ctx.stroke();
     }
 
@@ -554,12 +643,25 @@
       const { x: wx, y: wy } = pixelToWorld(px, py);
       const delta = -ev.deltaY;
       const zoomFactor = Math.exp(delta * 0.0015);
-      const nxmin = wx + (viewport.xmin - wx) / zoomFactor;
-      const nxmax = wx + (viewport.xmax - wx) / zoomFactor;
-      const nymin = wy + (viewport.ymin - wy) / zoomFactor;
-      const nymax = wy + (viewport.ymax - wy) / zoomFactor;
-      if (Math.abs(nxmax - nxmin) < 1e-9 || Math.abs(nymax - nymin) < 1e-9)
-        return;
+      let nxmin = wx + (viewport.xmin - wx) / zoomFactor;
+      let nxmax = wx + (viewport.xmax - wx) / zoomFactor;
+      let nymin = wy + (viewport.ymin - wy) / zoomFactor;
+      let nymax = wy + (viewport.ymax - wy) / zoomFactor;
+      // enforce sensible min/max spans to avoid numeric issues
+      const minSpan = 1e-12; // don't zoom in beyond this
+      const maxSpan = 1e100; // allow very large zoom-out
+      const newW = Math.abs(nxmax - nxmin);
+      const newH = Math.abs(nymax - nymin);
+      if (newW < minSpan || newH < minSpan) return;
+      if (newW > maxSpan || newH > maxSpan) {
+        // clamp around cursor world point to maxSpan
+        const halfW = maxSpan / 2;
+        nxmin = wx - halfW;
+        nxmax = wx + halfW;
+        const halfH = maxSpan / 2;
+        nymin = wy - halfH;
+        nymax = wy + halfH;
+      }
       viewport.xmin = nxmin;
       viewport.xmax = nxmax;
       viewport.ymin = nymin;
