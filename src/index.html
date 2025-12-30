@@ -11,19 +11,9 @@
 
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
 
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
-    />
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"
-    ></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/mathjs/lib/browser/math.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer/nerdamer.core.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer/Algebra.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer/Calculus.js"></script>
+    <script src="../lib/nerdamer.core.js"></script>
+    <script src="../lib/Algebra.js"></script>
+    <script src="../lib/Calculus.js"></script>
 
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
@@ -63,12 +53,12 @@
         <aside id="user_input_section" aria-labelledby="controls_heading">
           <h2 id="controls_heading" class="visually-hidden">Graph controls</h2>
           <div id="function_input_1" class="function-input">
-            <label for="function1"
+            <div id="label_function1"
               ><span class="fn-label">f(x)</span>
-              <span class="fn-index"></span></label
+              <span class="fn-index"></span></div
             >
             <div>
-              <p><span id="function1"></span></p>
+              <label for="textarea1234"><p><span id="function1"></span></p></label>
               <script>
                 let mathFieldSpan = document.getElementById("function1");
                 let MQ = MathQuill.getInterface(2);

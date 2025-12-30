@@ -184,6 +184,87 @@
     return { px, py };
   }
 
+  // factorial helper using nerdamer (uses Gamma, works for real domain)
+  // Fast factorial via Gamma (Lanczos approximation) with caching.
+  (function() {
+    var cache = new Map();
+    // Lanczos coefficients
+    var p = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+      -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+      9.9843695780195716e-6, 1.5056327351493116e-7];
+
+    function lanczosGamma(z) {
+      if (isNaN(z)) return NaN;
+      if (!isFinite(z)) return z > 0 ? Infinity : NaN;
+      if (z < 0.5) {
+        return Math.PI / (Math.sin(Math.PI * z) * lanczosGamma(1 - z));
+      }
+      z -= 1;
+      var x = 0.99999999999980993;
+      for (var i = 0; i < p.length; i++) {
+        x += p[i] / (z + i + 1);
+      }
+      var t = z + p.length - 0.5;
+      return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
+    }
+
+    function fastFactorial(v) {
+      // accept numbers or numeric strings (evaluate lazily)
+      var key = typeof v === 'number' ? v : String(v).trim();
+      if (cache.has(key)) return cache.get(key);
+      var num = typeof v === 'number' ? v : Number(key);
+      var result;
+      if (!isFinite(num) || isNaN(num)) result = NaN;
+      else {
+        // factorial(x) = Gamma(x+1)
+        result = lanczosGamma(num + 1);
+      }
+      cache.set(key, result);
+      return result;
+    }
+
+    // expose under the previously used global name so generated functions can call it
+    window.__nerdFactorial = fastFactorial;
+  })();
+
+  // replace postfix factorials like x!, (expr)!, sin(x)!, Math.PI!, etc.
+  function replaceFactorials(expr) {
+    if (!expr) return expr;
+    // normalize spacing around '!'
+    expr = expr.replace(/\s*!\s*/g, '!');
+    let idx = 0;
+    while ((idx = expr.indexOf('!', idx)) !== -1) {
+      let j = idx - 1;
+      if (j < 0) { idx++; continue; }
+      if (expr[j] === ')') {
+        // find matching '('
+        let depth = 0, k = j;
+        for (; k >= 0; k--) {
+          if (expr[k] === ')') depth++;
+          else if (expr[k] === '(') { depth--; if (depth === 0) break; }
+        }
+        if (k < 0) { idx++; continue; }
+        // include possible function name or dotted prefix before '('
+        let start = k;
+        let p = start - 1;
+        while (p >= 0 && /[A-Za-z0-9_.]/.test(expr[p])) p--;
+        start = p + 1;
+        const operand = expr.slice(start, idx);
+        expr = expr.slice(0, start) + '(__nerdFactorial(' + operand + '))' + expr.slice(idx + 1);
+        idx = start + 1;
+      } else {
+        // identifier or number
+        let k = j;
+        while (k >= 0 && /[A-Za-z0-9_.]/.test(expr[k])) k--;
+        const start = k + 1;
+        const operand = expr.slice(start, idx);
+        expr = expr.slice(0, start) + '(__nerdFactorial(' + operand + '))' + expr.slice(idx + 1);
+        idx = start + 1;
+      }
+    }
+    return expr;
+  }
+
   // keep track of last plotted expressions so redraw persists
   const lastPlot = { f1raw: "", f2raw: "" };
 
@@ -209,8 +290,12 @@
       expr = expr.replace(/\bcsc\s*\(/g, "1/Math.sin(");
       expr = expr.replace(/\bsec\s*\(/g, "1/Math.cos(");
       expr = expr.replace(/\bcot\s*\(/g, "1/Math.tan(");
+
+      
       // prefix common functions with Math., but avoid double-prefixing Math.*
       expr = expr.replace(/(?<!Math\.)\b(sin|cos|tan|csc|sec|cot|asin|acos|atan|sinh|cosh|tanh|abs|floor|ceil|sqrt|log|max|min|pow|exp)\s*\(/g, "Math.$1(");
+      // convert postfix factorials to runtime nerdamer calls
+      expr = replaceFactorials(expr);
       try {
         return new Function("x", "y", "return (" + expr + ");");
       } catch (err) {
@@ -350,6 +435,8 @@
       expr = expr.replace(/\bsec\s*\(/g, "1/Math.cos(");
       expr = expr.replace(/\bcot\s*\(/g, "1/Math.tan(");
       expr = expr.replace(/(?<!Math\.)\b(sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|abs|floor|ceil|sqrt|log|max|min|pow|exp)\s*\(/g, "Math.$1(");
+      // convert postfix factorials to runtime nerdamer calls
+      expr = replaceFactorials(expr);
       try {
         return new Function("x", "return (" + expr + ");");
       } catch (err) {
