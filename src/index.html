@@ -2,44 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Graphing Calculator</title>
-
-    <link rel="stylesheet" href="../lib/mathquill.css" />
-    <script src="../lib/jquery.js"></script>
-    <script src="../lib/mathquill.js"></script>
-
-    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
-
-    <script src="../lib/nerdamer.core.js"></script>
-    <script src="../lib/Algebra.js"></script>
-    <script src="../lib/Calculus.js"></script>
-
-    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-
+    <link rel="stylesheet" href="style.css" />
+    <meta
+      name="description"
+      content="You can use it to perform calculations and plot it on the graph for the understanding. Perform variety of calculations and it will show you the results on the graph."
+    />
+    <link rel="shortcut icon" href="favicon.svg" type="image/svg+xml" />
     <link
       href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@300&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,300&display=swap"
-      rel="stylesheet"
-    />
-
-    <link rel="stylesheet" href="style.css" />
-    <meta
-      name="description"
-      content="A web-based graphing calculator that supports LaTeX input and interactive plotting."
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,300&display=swap" rel="stylesheet">
+    <title>Graphing Calculator</title>
   </head>
   <body>
     <div id="container">
       <header class="header">
         <div>
           <div class="title">Graphing Calculator</div>
-          <div class="subtitle">
-            Type an expression using x, e.g. sin(x), x^2, ln(x)
-          </div>
+          <div class="subtitle">Type an expression using x, e.g. sin(x), x^2, ln(x)</div>
         </div>
         <div>
           <small>Lightweight demo</small>
@@ -51,75 +34,38 @@
         </div>
 
         <aside id="user_input_section" aria-labelledby="controls_heading">
-          <h2 id="controls_heading" class="visually-hidden">Graph controls</h2>
-          <div id="function_input_1" class="function-input">
-            <div id="label_function1"
-              ><span class="fn-label">f(x)</span>
-              <span class="fn-index"></span></div
-            >
-            <div>
-              <label for="textarea1234"><p><span id="function1"></span></p></label>
-              <script>
-                let mathFieldSpan = document.getElementById("function1");
-                let MQ = MathQuill.getInterface(2);
-                let f1data = "";
-                let mathField = MQ.MathField(mathFieldSpan, {spaceBehavesLikeTab: true,handlers: {edit: function () {f1data = mathField.latex();},},});
-              </script>
-            </div>
-          </div>
-          <div id="function_input_2" class="function-input">
-            <label for="function2"
-              ><span class="fn-label">f(x)</span>
-              <span class="fn-index">2</span></label
-            >
-            <div>
-              <input
-                id="function2"
-                name="function2"
-                type="text"
-                spellcheck="false"
-                placeholder="optional"
-                aria-label="Function 2"
-              />
-            </div>
-          </div>
+        <h2 id="controls_heading" class="visually-hidden">Graph controls</h2>
+        <div id="function_input_1" class="function-input">
+          <label for="function1"><span class="fn-label">f(x)</span> <span class="fn-index">1</span></label>
+          <div><input id="function1" name="function1" type="text" spellcheck="false" placeholder="e.g. sin(x)" aria-label="Function 1"></div>
+        </div>
+        <div id="function_input_2" class="function-input">
+          <label for="function2"><span class="fn-label">f(x)</span> <span class="fn-index">2</span></label>
+          <div><input id="function2" name="function2" type="text" spellcheck="false" placeholder="optional" aria-label="Function 2"></div>
+        </div>
 
-          <section id="user_button_section" aria-label="Calculator buttons">
-            <div>
-              <button type="button" data-value="sin" aria-label="sin">
-                sin
-              </button>
-              <button type="button" data-value="cos" aria-label="cos">
-                cos
-              </button>
-              <button type="button" data-value="tan" aria-label="tan">
-                tan
-              </button>
-              <button type="button" data-value="pi" aria-label="pi">π</button>
-              <button type="button" data-value="e" aria-label="e">e</button>
-            </div>
-            <div>
-              <button type="button" data-value="abs" aria-label="absolute">
-                |x|
-              </button>
-              <button type="button" data-value="floor" aria-label="floor">
-                ⌊x⌋
-              </button>
-              <button type="button" data-value="ceil" aria-label="ceil">
-                ⌈x⌉
-              </button>
-              <button type="button" data-action="clear" aria-label="clear">
-                C
-              </button>
-              <button type="button" data-action="plot" aria-label="plot">
-                Plot
-              </button>
-            </div>
-          </section>
+
+        <section id="user_button_section" aria-label="Calculator buttons">
+          <div>
+            <button type="button" data-value="sin" aria-label="sin">sin</button>
+            <button type="button" data-value="cos" aria-label="cos">cos</button>
+            <button type="button" data-value="tan" aria-label="tan">tan</button>
+            <button type="button" data-value="pi" aria-label="pi">π</button>
+            <button type="button" data-value="e" aria-label="e">e</button>
+          </div>
+          <div>
+            <button type="button" data-value="abs" aria-label="absolute">|x|</button>
+            <button type="button" data-value="floor" aria-label="floor">⌊x⌋</button>
+            <button type="button" data-value="ceil" aria-label="ceil">⌈x⌉</button>
+            <button type="button" data-action="clear" aria-label="clear">C</button>
+            <button type="button" data-action="plot" aria-label="plot">Plot</button>
+          </div>
+        </section>
+
         </aside>
       </main>
-    </div>
 
+    </div>
     <script src="script.js"></script>
   </body>
 </html>
