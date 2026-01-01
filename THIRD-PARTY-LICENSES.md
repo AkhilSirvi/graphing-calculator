@@ -22,6 +22,15 @@ licenses as described below.
     header is retained in the JavaScript file; see the repository history or
     file diffs for details of the changes.
 
+- Nerdamer
+  - License: MIT
+  - Upstream: https://nerdamer.com/ and https://github.com/jiggzson/nerdamer
+  - License text: the project is released under the MIT License. The bundled
+    file in this repository (`lib/nerdamer.core.js`) contains author/source
+    headers; include the full MIT license text alongside the library if you
+    redistribute.
+  - Bundled file in this repo: `lib/nerdamer.core.js`
+
 Notes
 
 - If you redistribute this project or portions of it, you must comply with the

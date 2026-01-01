@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Graphing Calculator</title>
 
@@ -15,14 +15,8 @@
     <script src="../lib/Algebra.js"></script>
     <script src="../lib/Calculus.js"></script>
 
-    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-
     <link
-      href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@300&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,300&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
 
@@ -35,91 +29,102 @@
   <body>
     <div id="container">
       <header class="header">
-        <div>
-          <div class="title">Graphing Calculator</div>
-          <div class="subtitle">
-            Type an expression using x, e.g. sin(x), x^2, ln(x)
+        <div class="header-left">
+          <img src="../assets/favicon.svg" alt="Icon" style="width: 15%;">
+          <div>
+            <div class="title">Graphing Calculator</div>
+            <div class="subtitle">Advanced Mathematical Visualization</div>
           </div>
         </div>
-        <div>
-          <small>Lightweight demo</small>
+        <div class="header-right">
+          <button id="theme-toggle" aria-label="Toggle theme">
+            <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+            <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
         </div>
       </header>
       <main id="main">
-        <div id="graph_page">
-          <div id="new_graph_page"></div>
-        </div>
-
         <aside id="user_input_section" aria-labelledby="controls_heading">
           <h2 id="controls_heading" class="visually-hidden">Graph controls</h2>
+          <div class="input-section-header">
+            <h3>Functions</h3>
+            <span class="input-badge">LaTeX Supported</span>
+          </div>
           <div id="function_input_1" class="function-input">
-            <div id="label_function1"
-              ><span class="fn-label">f(x)</span>
-              <span class="fn-index"></span></div
-            >
-            <div>
-              <label for="textarea1234"><p><span id="function1"></span></p></label>
-              <script>
-                let mathFieldSpan = document.getElementById("function1");
-                let MQ = MathQuill.getInterface(2);
-                let f1data = "";
-                let mathField = MQ.MathField(mathFieldSpan, {spaceBehavesLikeTab: true,handlers: {edit: function () {f1data = mathField.latex();},},});
-              </script>
+            <div class="fn-indicator fn-indicator-1"></div>
+            <div id="label_function1" class="fn-label-wrapper">
+              <span class="fn-label">f₁(x)</span>
+            </div>
+            <div class="fn-input-wrapper">
+              <span id="function1"></span>
             </div>
           </div>
           <div id="function_input_2" class="function-input">
-            <label for="function2"
-              ><span class="fn-label">f(x)</span>
-              <span class="fn-index">2</span></label
-            >
-            <div>
-              <input
-                id="function2"
-                name="function2"
-                type="text"
-                spellcheck="false"
-                placeholder="optional"
-                aria-label="Function 2"
-              />
+            <div class="fn-indicator fn-indicator-2"></div>
+            <div id="label_function2" class="fn-label-wrapper">
+              <span class="fn-label">f₂(x)</span>
+            </div>
+            <div class="fn-input-wrapper">
+              <span id="function2"></span>
             </div>
           </div>
 
           <section id="user_button_section" aria-label="Calculator buttons">
-            <div>
-              <button type="button" data-value="sin" aria-label="sin">
-                sin
+            <div class="button-group-header">Trigonometric</div>
+            <div class="button-row">
+              <button type="button" class="calc-btn" data-value="sin" aria-label="sin">
+                <span class="btn-text">sin</span>
               </button>
-              <button type="button" data-value="cos" aria-label="cos">
-                cos
+              <button type="button" class="calc-btn" data-value="cos" aria-label="cos">
+                <span class="btn-text">cos</span>
               </button>
-              <button type="button" data-value="tan" aria-label="tan">
-                tan
+              <button type="button" class="calc-btn" data-value="tan" aria-label="tan">
+                <span class="btn-text">tan</span>
               </button>
-              <button type="button" data-value="pi" aria-label="pi">π</button>
-              <button type="button" data-value="e" aria-label="e">e</button>
             </div>
-            <div>
-              <button type="button" data-value="abs" aria-label="absolute">
-                |x|
+            <div class="button-group-header">Constants & Operations</div>
+            <div class="button-row">
+              <button type="button" class="calc-btn" data-value="pi" aria-label="pi">
+                <span class="btn-text">π</span>
               </button>
-              <button type="button" data-value="floor" aria-label="floor">
-                ⌊x⌋
+              <button type="button" class="calc-btn" data-value="e" aria-label="e">
+                <span class="btn-text">e</span>
               </button>
-              <button type="button" data-value="ceil" aria-label="ceil">
-                ⌈x⌉
+              <button type="button" class="calc-btn" data-value="abs" aria-label="absolute">
+                <span class="btn-text">|x|</span>
               </button>
-              <button type="button" data-action="clear" aria-label="clear">
-                C
+            </div>
+            <div class="button-row">
+              <button type="button" class="calc-btn" data-value="floor" aria-label="floor">
+                <span class="btn-text">⌊x⌋</span>
               </button>
-              <button type="button" data-action="plot" aria-label="plot">
-                Plot
+              <button type="button" class="calc-btn" data-value="ceil" aria-label="ceil">
+                <span class="btn-text">⌈x⌉</span>
+              </button>
+            </div>
+            <div class="button-group-header">Actions</div>
+            <div class="button-row action-buttons">
+              <button type="button" class="calc-btn btn-clear" data-action="clear" aria-label="clear">
+                <span class="btn-text">Clear</span>
+              </button>
+              <button type="button" class="calc-btn btn-plot" data-action="plot" aria-label="plot">
+                <span class="btn-text">Plot Graph</span>
               </button>
             </div>
           </section>
         </aside>
+        <div id="graph_page">
+          <div id="new_graph_page"></div>
+        </div>
       </main>
     </div>
 
+    <script src="graph/graph.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
