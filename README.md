@@ -6,6 +6,8 @@ Overview
 --------
 This is a lightweight web-based graphing calculator that accepts user-entered functions (LaTeX-supported via MathQuill or plain expressions) and renders them on an interactive canvas. The app focuses on implicit plotting (contour-like rendering of f(x,y)=0) using a marching-squares style approach, persistent overlay helpers (points/lines), and a small developer console API for programmatic control.
 
+**Live Demo** : https://akhilsirvi.github.io/graphing-calculator/src/
+
 Key features
 ------------
 - Interactive MathQuill input for functions with LaTeX support.
