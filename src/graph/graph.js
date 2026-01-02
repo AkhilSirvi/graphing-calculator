@@ -398,6 +398,11 @@
   }
 
   function clearAndRedraw(ctx, graphPage) {
+    try {
+      if (window.Graph && typeof window.Graph.rebuildImplicit === 'function') {
+        window.Graph.rebuildImplicit();
+      }
+    } catch (e) {}
     drawGrid(ctx);
   }
 

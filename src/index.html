@@ -30,13 +30,26 @@
     <div id="container">
       <header class="header">
         <div class="header-left">
-          <img src="../assets/favicon.svg" alt="Icon" style="width: 15%;">
+          <img src="../assets/favicon.svg" alt="Icon" id="favicon">
           <div>
             <div class="title">Graphing Calculator</div>
             <div class="subtitle">Advanced Mathematical Visualization</div>
           </div>
         </div>
         <div class="header-right">
+          <div class="header-links">
+            <a href="https://github.com/AkhilSirvi" target="_blank" rel="noopener noreferrer" class="header-link" aria-label="GitHub profile">
+              <svg class="github-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 .5C5.73.5.75 5.48.75 11.75c0 4.93 3.19 9.11 7.61 10.58.56.1.77-.24.77-.53 0-.26-.01-1.12-.02-2.03-3.09.67-3.74-1.49-3.74-1.49-.5-1.27-1.22-1.61-1.22-1.61-.99-.68.08-.67.08-.67 1.1.08 1.68 1.13 1.68 1.13.98 1.68 2.58 1.19 3.21.91.1-.71.38-1.19.69-1.47-2.47-.28-5.07-1.24-5.07-5.52 0-1.22.44-2.21 1.16-2.99-.12-.29-.5-1.46.11-3.05 0 0 .95-.3 3.12 1.14a10.8 10.8 0 0 1 2.84-.38c.96 0 1.93.13 2.84.38 2.16-1.44 3.11-1.14 3.11-1.14.61 1.59.23 2.76.12 3.05.72.78 1.15 1.77 1.15 2.99 0 4.29-2.6 5.24-5.08 5.51.39.33.74.98.74 1.98 0 1.43-.01 2.58-.01 2.93 0 .29.2.64.78.53C19.07 20.86 22.25 16.69 22.25 11.75 22.25 5.48 17.27.5 12 .5z"/>
+              </svg>
+            </a>
+            <a href="https://github.com/AkhilSirvi/graphing-calculator" target="_blank" rel="noopener noreferrer" class="header-link" aria-label="GitHub repository">
+              <svg class="repo-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="14" rx="2" stroke="currentColor" fill="currentColor" opacity="0.03"></rect>
+                <path d="M7 8h10M7 12h6" stroke="currentColor"></path>
+              </svg>
+            </a>
+          </div>
           <button id="theme-toggle" aria-label="Toggle theme">
             <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <circle cx="12" cy="12" r="5"/>
@@ -58,19 +71,25 @@
           <div id="function_input_1" class="function-input">
             <div class="fn-indicator fn-indicator-1"></div>
             <div id="label_function1" class="fn-label-wrapper">
-              <span class="fn-label">f₁(x)</span>
+              <span class="fn-label">f₁(x,y)</span>
             </div>
             <div class="fn-input-wrapper">
               <span id="function1"></span>
+            </div>
+            <div class="fn-color-picker-wrapper">
+              <input type="color" class="fn-color-picker" id="color_function1" value="#d33b3b" title="Change function color" aria-label="Color picker for function 1">
             </div>
           </div>
           <div id="function_input_2" class="function-input">
             <div class="fn-indicator fn-indicator-2"></div>
             <div id="label_function2" class="fn-label-wrapper">
-              <span class="fn-label">f₂(x)</span>
+              <span class="fn-label">f₂(x,y)</span>
             </div>
             <div class="fn-input-wrapper">
               <span id="function2"></span>
+            </div>
+            <div class="fn-color-picker-wrapper">
+              <input type="color" class="fn-color-picker" id="color_function2" value="#1f77b4" title="Change function color" aria-label="Color picker for function 2">
             </div>
           </div>
 
@@ -126,5 +145,6 @@
 
     <script src="graph/graph.js"></script>
     <script src="script.js"></script>
+    <script src="graph/graph_rendering.js"></script>
   </body>
 </html>

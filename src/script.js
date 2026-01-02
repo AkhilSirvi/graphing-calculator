@@ -8,6 +8,8 @@
     { data: "", mathField: null, spanId: "function1", color: defaultColors[0] },
     { data: "", mathField: null, spanId: "function2", color: defaultColors[1] }
   ];
+  // Track the index of the last-focused MathQuill function field
+  let lastFocusedFunctionIndex = null;
   // Function to add a new function dynamically
   function addFunction() {
     const index = functions.length + 1;
@@ -26,17 +28,34 @@
     inputDiv.innerHTML = `
       <div class="fn-indicator" style="background: ${gradients[colorIndex % gradients.length]};"></div>
       <div id="label_function${index}" class="fn-label-wrapper">
-        <span class="fn-label">f₃(x)</span>
+        <span class="fn-label">f₃(x,y)</span>
       </div>
       <div class="fn-input-wrapper">
         <span id="${spanId}"></span>
       </div>
+      <div class="fn-color-picker-wrapper">
+        <input type="color" class="fn-color-picker" id="color_${spanId}" value="${color}" title="Change function color" aria-label="Color picker for function ${index}">
+      </div>
     `;
-    console.log(functions)
     const buttonSection = document.getElementById("user_button_section");
     document.getElementById("user_input_section").insertBefore(inputDiv, buttonSection);
     functions.push({ data: "", mathField: null, spanId: spanId, color: color });
     initializeFunction(functions.length - 1);
+    
+    // Setup color picker for the new function
+    const newColorPicker = document.getElementById(`color_${spanId}`);
+    if (newColorPicker) {
+      const applyNewColor = (val) => {
+        functions[functions.length - 1].color = val;
+        const indicator = document.querySelector(`#function_input_${index} .fn-indicator`);
+        if (indicator) indicator.style.background = val;
+        if (window.Graph && typeof window.Graph.clearAndRedraw === 'function') {
+          window.Graph.clearAndRedraw(ctx, graphPage);
+        }
+      };
+      newColorPicker.addEventListener('input', (e) => applyNewColor(e.target.value));
+      newColorPicker.addEventListener('change', (e) => applyNewColor(e.target.value));
+    }
   }
   // Initialize a specific function
   function initializeFunction(idx) {
@@ -55,15 +74,50 @@
         textarea.id = func.spanId + '-input';
         const labelId = 'label_' + func.spanId;
         textarea.setAttribute('aria-labelledby', labelId);
+        // When the MathQuill textarea gains focus, remember which function is active
+        textarea.addEventListener('focus', () => {
+          lastFocusedFunctionIndex = idx;
+        });
       }
+      // Also mark focus when the visible span is clicked
+      span.addEventListener('click', () => {
+        lastFocusedFunctionIndex = idx;
+        try { if (func.mathField && typeof func.mathField.focus === 'function') func.mathField.focus(); } catch (e) {}
+      });
     }
   }
   // Initialize existing functions
   functions.forEach((_, idx) => initializeFunction(idx));
+  
+  // Setup color pickers for existing functions
+  functions.forEach((func, idx) => {
+    const colorPicker = document.getElementById(`color_${func.spanId}`);
+    if (colorPicker) {
+      const applyColor = (val) => {
+        func.color = val;
+        const indicator = document.querySelector(`#function_input_${idx + 1} .fn-indicator`);
+        if (indicator) indicator.style.background = val;
+        if (window.Graph && typeof window.Graph.clearAndRedraw === 'function') {
+          window.Graph.clearAndRedraw(ctx, graphPage);
+        }
+      };
+      colorPicker.addEventListener('input', (e) => applyColor(e.target.value));
+      colorPicker.addEventListener('change', (e) => applyColor(e.target.value));
+    }
+  });
+  
   // Add button to add more functions
   const addButton = document.createElement("button");
   addButton.type = "button";
-  addButton.textContent = "Add Function";
+  addButton.id = "add-function-btn";
+  addButton.className = "add-function-btn";
+  addButton.innerHTML = `
+    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    <span>Add Function</span>
+  `;
   addButton.addEventListener("click", addFunction);
   document.getElementById("user_button_section").appendChild(addButton);
   // initial canvas
@@ -73,6 +127,10 @@
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
+    
+    // Skip if it's the add function button (handled by its own listener)
+    if (btn.id === "add-function-btn") return;
+    
     const action = btn.dataset.action;
     const value = btn.dataset.value;
     if (action === "clear") {
@@ -84,21 +142,106 @@
       return;
     }
     if (action === "plot") {
-      const functionData = functions.map(func => ({ data: func.data || "", color: func.color }));
-      window.Graph.drawGrid(ctx);
+      // refresh stored function data from MathQuill fields
+      functions.forEach(func => {
+        if (func.mathField && typeof func.mathField.latex === 'function') {
+          try { func.data = func.mathField.latex(); } catch (e) {}
+        }
+      });
+
+      // clear previous overlays then rebuild implicit plots from App.functions
+      try { window.Graph.clearLines(); } catch (e) {}
+      try { window.Graph.clearPoints(); } catch (e) {}
+      try {
+        if (typeof window.Graph.rebuildImplicit === 'function') window.Graph.rebuildImplicit();
+      } catch (e) {
+        console.warn('rebuildImplicit failed', e);
+      }
+      // immediate draw so user sees plot without panning/zooming
+      try { window.Graph.drawGrid(ctx); } catch (e) {}
       return;
     }
     if (value) {
       const active = document.activeElement;
-      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")){
-        const start = active.selectionStart || 0;
-        const end = active.selectionEnd || 0;
-        const text = active.value;
-        const insert = value === "pi" ? "Math.PI" : value === "e" ? "Math.E" : value;
-        active.value = text.slice(0, start) + insert + text.slice(end);
-        const pos = start + insert.length;
-        active.setSelectionRange(pos, pos);
-        active.focus();
+      const mqInsertMap = { pi: '\\pi', e: 'e', sin: '\\sin', cos: '\\cos', tan: '\\tan' };
+      const insertForInput = value === 'pi' ? 'Math.PI' : value === 'e' ? 'Math.E' : value;
+      const insertForMQ = mqInsertMap[value] || value;
+
+      // If no meaningful element is focused, try the last-focused MathQuill field
+      if (!active || active.tagName === 'BUTTON' || active === document.body || active === document.documentElement) {
+        if (lastFocusedFunctionIndex !== null) {
+          const targetFunc = functions[lastFocusedFunctionIndex];
+          if (targetFunc && targetFunc.mathField) {
+            try {
+              if (typeof targetFunc.mathField.write === 'function') targetFunc.mathField.write(insertForMQ);
+              else if (typeof targetFunc.mathField.cmd === 'function') targetFunc.mathField.cmd(insertForMQ);
+              targetFunc.mathField.focus();
+              return;
+            } catch (e) {}
+          }
+        }
+      }
+
+      if (active) {
+        // If the active element is an input/textarea that's part of a MathQuill field,
+        // forward the insertion to the corresponding MathQuill instance so it updates correctly.
+        if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') {
+          const mathFunc = functions.find(f => {
+            const span = document.getElementById(f.spanId);
+            if (!span) return false;
+            const ta = span.querySelector('textarea');
+            return ta === active;
+          });
+          if (mathFunc && mathFunc.mathField) {
+            try {
+              if (typeof mathFunc.mathField.write === 'function') mathFunc.mathField.write(insertForMQ);
+              else if (typeof mathFunc.mathField.cmd === 'function') mathFunc.mathField.cmd(insertForMQ);
+              mathFunc.mathField.focus();
+              return;
+            } catch (e) {}
+          }
+
+          // Plain input/textarea fallback behavior
+          const start = active.selectionStart || 0;
+          const end = active.selectionEnd || 0;
+          const text = active.value;
+          active.value = text.slice(0, start) + insertForInput + text.slice(end);
+          const pos = start + insertForInput.length;
+          active.setSelectionRange(pos, pos);
+          active.focus();
+        } else {
+          // Try MathQuill editable field ancestor
+          const mqFieldEl = (active.classList && active.classList.contains('mq-editable-field')) ? active : (active.closest ? active.closest('.mq-editable-field') : null);
+          let handled = false;
+          if (mqFieldEl) {
+            const func = functions.find(f => {
+              const container = document.getElementById(f.spanId);
+              return container && container.contains(mqFieldEl);
+            });
+            if (func && func.mathField) {
+              try {
+                if (typeof func.mathField.write === 'function') {
+                  func.mathField.write(insertForMQ);
+                } else if (typeof func.mathField.cmd === 'function') {
+                  func.mathField.cmd(insertForMQ);
+                }
+                func.mathField.focus();
+                handled = true;
+              } catch (e) {}
+            }
+          }
+
+          if (!handled) {
+            // Fallback: insert into any contenteditable using execCommand
+            try {
+              document.execCommand('insertText', false, insertForInput);
+            } catch (e) {
+              if (active.isContentEditable) {
+                active.textContent = (active.textContent || '') + insertForInput;
+              }
+            }
+          }
+        }
       }
     }
   });
