@@ -438,17 +438,22 @@
         const it = pointers.values();
         const p1 = it.next().value;
         const p2 = it.next().value;
-        pinchStartDist = getDistance(p1, p2);
+        // avoid extremely small start distances which lead to huge scale factors
+        pinchStartDist = Math.max(getDistance(p1, p2), 1e-3);
         pinchStartViewport = { xmin: viewport.xmin, xmax: viewport.xmax, ymin: viewport.ymin, ymax: viewport.ymax };
-        // lock the pinch center in world coordinates so two-finger gestures only scale
+        // lock the pinch center in world coordinates and record its pixel position
         try {
           const rect = canvas.getBoundingClientRect();
           const mid = getMidpoint(p1, p2);
           const px = mid.x - rect.left;
           const py = mid.y - rect.top;
           pinchStartCenter = pixelToWorld(ctx, px, py);
+          pinchStartCenter._px = px;
+          pinchStartCenter._py = py;
         } catch (e) {
           pinchStartCenter = { x: (viewport.xmin + viewport.xmax) / 2, y: (viewport.ymin + viewport.ymax) / 2 };
+          pinchStartCenter._px = null;
+          pinchStartCenter._py = null;
         }
       } else {
         // single-finger pan start
@@ -472,7 +477,9 @@
         const p2 = it.next().value;
         const curDist = getDistance(p1, p2);
         if (!pinchStartDist || pinchStartDist === 0) return;
-        const zoomFactor = curDist / pinchStartDist;
+        // clamp zoom factor to a safe range to avoid numeric explosions
+        const rawZoom = curDist / pinchStartDist;
+        const zoomFactor = Math.max(1e-3, Math.min(1e3, rawZoom));
         // scale relative to the locked pinch start center and viewport (no translation)
         const sv = pinchStartViewport;
         const cx = pinchStartCenter ? pinchStartCenter.x : (sv.xmin + sv.xmax) / 2;
@@ -494,6 +501,27 @@
           nymin = cy - halfH;
           nymax = cy + halfH;
         }
+        // compensate for any pixel offset so the locked center stays at the same canvas pixel
+        try {
+          if (pinchStartCenter && pinchStartCenter._px != null) {
+            const dpr = window.devicePixelRatio || 1;
+            const w = canvas.width / dpr;
+            const h = canvas.height / dpr;
+            // compute pixel position of the center under the new viewport
+            const pxNew = ((cx - nxmin) / (nxmax - nxmin)) * w;
+            const pyNew = (1 - (cy - nymin) / (nymax - nymin)) * h;
+            const dxPx = pxNew - pinchStartCenter._px;
+            const dyPx = pyNew - pinchStartCenter._py;
+            // convert pixel offset to world offset in new viewport and shift viewport to compensate
+            const shiftWorldX = (dxPx / w) * (nxmax - nxmin);
+            const shiftWorldY = -(dyPx / h) * (nymax - nymin);
+            nxmin -= shiftWorldX;
+            nxmax -= shiftWorldX;
+            nymin -= shiftWorldY;
+            nymax -= shiftWorldY;
+          }
+        } catch (e) {}
+
         viewport.xmin = nxmin;
         viewport.xmax = nxmax;
         viewport.ymin = nymin;
