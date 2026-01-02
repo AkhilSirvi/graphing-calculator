@@ -423,9 +423,19 @@
     }
 
     graphPage.addEventListener("pointerdown", (ev) => {
-      ev.preventDefault();
       const canvas = graphPage.querySelector("canvas");
       if (!canvas) return;
+      // allow form controls and contenteditable elements to receive focus
+      // (so mobile keyboards can open). Only intercept when tapping the canvas.
+      try {
+        const tgt = ev.target;
+        if (tgt instanceof HTMLElement) {
+          const tag = tgt.tagName;
+          const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tgt.isContentEditable;
+          if (isInput) return;
+        }
+      } catch (e) {}
+      ev.preventDefault();
       // store pointer info (client coords)
       pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
       canvas.setPointerCapture(ev.pointerId);

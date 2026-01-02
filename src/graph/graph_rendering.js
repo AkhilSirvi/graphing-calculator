@@ -195,7 +195,6 @@ function main(rawExpr, settings = { m: 100, n: 100, color: "red", width: 1 }) {
   }
 
   const graphPage = document.getElementById("new_graph_page");
-  // do not draw directly here; add persistent lines so redraw uses them
 
   const xmin = window.Graph.viewport.xmin;
   const ymin = window.Graph.viewport.ymin;
