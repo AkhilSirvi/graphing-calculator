@@ -114,7 +114,7 @@ let m = 10000; // division of x axis
 let n = 10000; // division of y axis
 let resolution = m*n;
 
-const JUMP = 5;        // reject massive jumps
+const JUMP = 0.5;        // reject massive jumps
 const ZERO_RANGE = 1;  // only care near real zero crossings
 
 function goodTransition(a, b) {
