@@ -12,6 +12,9 @@
     if (old) old.remove();
     const canvas = document.createElement("canvas");
     canvas.style.cssText = "width:100%;height:100%;display:block;";
+    // ensure pointer gestures are handled by our handlers (no browser pinch/scroll)
+    canvas.style.touchAction = 'none';
+    canvas.style.userSelect = 'none';
     canvas.setAttribute("aria-label", "Graph area");
     graphPage.appendChild(canvas);
       // prevent container scrollbars from appearing when interacting with the canvas
@@ -452,6 +455,7 @@
       if (!canvas) return;
 
       if (isPinching && pointers.size >= 2) {
+        ev.preventDefault();
         // pinch-to-zoom: compute current distance and center
         const it = pointers.values();
         const p1 = it.next().value;
