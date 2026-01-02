@@ -413,7 +413,7 @@
     // Support both single-finger panning and two-finger pinch-to-zoom.
     let isPanning = false, panStart = null;
     const pointers = new Map();
-    let isPinching = false, pinchStartDist = null, pinchStartViewport = null;
+    let isPinching = false, pinchStartDist = null, pinchStartViewport = null, pinchStartCenter = null;
 
     function getDistance(a, b) {
       return Math.hypot(a.x - b.x, a.y - b.y);
@@ -440,6 +440,16 @@
         const p2 = it.next().value;
         pinchStartDist = getDistance(p1, p2);
         pinchStartViewport = { xmin: viewport.xmin, xmax: viewport.xmax, ymin: viewport.ymin, ymax: viewport.ymax };
+        // lock the pinch center in world coordinates so two-finger gestures only scale
+        try {
+          const rect = canvas.getBoundingClientRect();
+          const mid = getMidpoint(p1, p2);
+          const px = mid.x - rect.left;
+          const py = mid.y - rect.top;
+          pinchStartCenter = pixelToWorld(ctx, px, py);
+        } catch (e) {
+          pinchStartCenter = { x: (viewport.xmin + viewport.xmax) / 2, y: (viewport.ymin + viewport.ymax) / 2 };
+        }
       } else {
         // single-finger pan start
         isPanning = true;
@@ -463,14 +473,10 @@
         const curDist = getDistance(p1, p2);
         if (!pinchStartDist || pinchStartDist === 0) return;
         const zoomFactor = curDist / pinchStartDist;
-        // compute midpoint in canvas coords and convert to world coords
-        const rect = canvas.getBoundingClientRect();
-        const mid = getMidpoint(p1, p2);
-        const px = mid.x - rect.left;
-        const py = mid.y - rect.top;
-        const { x: cx, y: cy } = pixelToWorld(ctx, px, py);
-        // scale relative to the pinch start viewport
+        // scale relative to the locked pinch start center and viewport (no translation)
         const sv = pinchStartViewport;
+        const cx = pinchStartCenter ? pinchStartCenter.x : (sv.xmin + sv.xmax) / 2;
+        const cy = pinchStartCenter ? pinchStartCenter.y : (sv.ymin + sv.ymax) / 2;
         let nxmin = cx + (sv.xmin - cx) / zoomFactor;
         let nxmax = cx + (sv.xmax - cx) / zoomFactor;
         let nymin = cy + (sv.ymin - cy) / zoomFactor;
@@ -521,6 +527,7 @@
         isPinching = false;
         pinchStartDist = null;
         pinchStartViewport = null;
+        pinchStartCenter = null;
       }
       if (pointers.size === 0) {
         isPanning = false;
