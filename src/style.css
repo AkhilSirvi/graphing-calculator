@@ -87,6 +87,12 @@ body {
     overflow: hidden;
 }
 
+/* Add bottom gap for left panel on mobile so typed input remains visible */
+@media (max-width: 767px) {
+    #user_input_section {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
 #graph_page {
     flex: 1 1 auto;
     min-width: 0;
@@ -97,6 +103,180 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+
+/* Mobile Virtual Keyboard */
+.mobile-keyboard {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--secondary-bg);
+    border-top: 2px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    max-height: 45vh;
+    overflow-y: auto;
+}
+
+.mobile-keyboard.visible {
+    transform: translateY(0);
+}
+
+.mobile-keyboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--tertiary-bg);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.mobile-keyboard-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.mobile-keyboard-close {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.mobile-keyboard-close:hover {
+    background: var(--border-color-light);
+    color: var(--text-color);
+}
+
+.mobile-keyboard-content {
+    padding: 10px;
+}
+
+.keyboard-section {
+    margin-bottom: 12px;
+}
+
+.keyboard-section:last-child {
+    margin-bottom: 0;
+}
+
+.keyboard-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.keyboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.keyboard-actions {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.kb-btn {
+    padding: 10px 6px;
+    background: var(--tertiary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kb-btn:active {
+    transform: scale(0.95);
+    background: var(--border-color-light);
+}
+
+.kb-btn:hover {
+    background: var(--border-color-light);
+    border-color: var(--accent-color);
+}
+
+.kb-btn.kb-action {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.kb-btn.kb-action:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.kb-btn.kb-action:active {
+    background: var(--accent-hover);
+}
+
+.btn-mobile-keyboard {
+    background: var(--accent-color) !important;
+    color: white !important;
+}
+
+.btn-mobile-keyboard:hover {
+    background: var(--accent-hover) !important;
+}
+
+@media (min-width: 768px) {
+    .mobile-keyboard {
+        max-width: 600px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100%);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    
+    .mobile-keyboard.visible {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@media (max-width: 767px) {
+    .keyboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+    }
+    
+    .kb-btn {
+        padding: 8px 4px;
+        font-size: 13px;
+        min-height: 38px;
+    }
+    
+    .mobile-keyboard-content {
+        padding: 8px;
+    }
+    
+    .keyboard-section {
+        margin-bottom: 10px;
+    }
 }
 
 #graph_page, #new_graph_page {

@@ -263,6 +263,104 @@
     // Redraw the graph with new theme
     window.Graph.clearAndRedraw(ctx, graphPage);
   });
+  // Mobile Keyboard Functionality
+  const mobileKeyboard = document.getElementById('mobile-keyboard');
+  const mobileKeyboardToggle = document.getElementById('mobile-keyboard-toggle');
+  const mobileKeyboardClose = document.getElementById('mobile-keyboard-close');
+  
+  // Toggle mobile keyboard visibility
+  function toggleMobileKeyboard() {
+    const isVisible = mobileKeyboard.classList.toggle('visible');
+    mobileKeyboard.setAttribute('aria-hidden', !isVisible);
+  }
+  
+  // Close mobile keyboard
+  function closeMobileKeyboard() {
+    mobileKeyboard.classList.remove('visible');
+    mobileKeyboard.setAttribute('aria-hidden', 'true');
+  }
+  
+  if (mobileKeyboardToggle) {
+    mobileKeyboardToggle.addEventListener('click', toggleMobileKeyboard);
+  }
+  
+  if (mobileKeyboardClose) {
+    mobileKeyboardClose.addEventListener('click', closeMobileKeyboard);
+  }
+  
+  // Get the currently active/focused MathQuill field
+  function getActiveMathField() {
+    if (lastFocusedFunctionIndex !== null && functions[lastFocusedFunctionIndex]) {
+      return functions[lastFocusedFunctionIndex].mathField;
+    }
+    // Default to first function if none focused
+    return functions[0] ? functions[0].mathField : null;
+  }
+  
+  // Handle keyboard button clicks
+  mobileKeyboard.addEventListener('click', (e) => {
+    const btn = e.target.closest('.kb-btn');
+    if (!btn) return;
+    
+    const mathField = getActiveMathField();
+    if (!mathField) return;
+    
+    // Handle actions
+    const action = btn.getAttribute('data-action');
+    if (action) {
+      switch (action) {
+        case 'backspace':
+          mathField.keystroke('Backspace');
+          break;
+        case 'left':
+          mathField.keystroke('Left');
+          break;
+        case 'right':
+          mathField.keystroke('Right');
+          break;
+        case 'clear':
+          mathField.latex('');
+          break;
+      }
+      return;
+    }
+    
+    // Handle LaTeX commands
+    const latex = btn.getAttribute('data-latex');
+    if (latex) {
+      mathField.cmd(latex);
+      mathField.focus();
+      return;
+    }
+    
+    // Handle direct commands (numbers, letters, operators)
+    const cmd = btn.getAttribute('data-cmd');
+    if (cmd) {
+      if (cmd === '(') {
+        mathField.cmd('(');
+        mathField.cmd(')');
+        mathField.keystroke('Left');
+      } else {
+        mathField.typedText(cmd);
+      }
+      mathField.focus();
+    }
+  });
+  
+  // Close keyboard when clicking outside
+  document.addEventListener('click', (e) => {
+    if (mobileKeyboard.classList.contains('visible') && 
+        !mobileKeyboard.contains(e.target) && 
+        !mobileKeyboardToggle.contains(e.target)) {
+      closeMobileKeyboard();
+    }
+  });
+  
+  // Prevent keyboard from closing when clicking inside it
+  mobileKeyboard.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
   // Expose useful internals for development / console inspection
   // Access these from the DevTools console as `window.App`
   try {
@@ -273,7 +371,9 @@
       ctx,
       addFunction,
       initializeFunction,
-      redraw: () => window.Graph.clearAndRedraw(ctx, graphPage)
+      redraw: () => window.Graph.clearAndRedraw(ctx, graphPage),
+      toggleMobileKeyboard,
+      closeMobileKeyboard
     });
   } catch (e) {
     // non-critical if assigning to window fails in some environments

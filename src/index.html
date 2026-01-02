@@ -135,12 +135,117 @@
                 <span class="btn-text">Plot Graph</span>
               </button>
             </div>
+            <div class="button-row action-buttons">
+              <button type="button" class="calc-btn btn-mobile-keyboard" id="mobile-keyboard-toggle" aria-label="Toggle mobile keyboard">
+                <span class="btn-text">Keyboard</span>
+              </button>
+            </div>
           </section>
         </aside>
         <div id="graph_page">
           <div id="new_graph_page"></div>
         </div>
       </main>
+    </div>
+
+    <!-- Mobile Virtual Keyboard -->
+    <div id="mobile-keyboard" class="mobile-keyboard" aria-hidden="true">
+      <div class="mobile-keyboard-header">
+        <span class="mobile-keyboard-title">Math Keyboard</span>
+        <button type="button" class="mobile-keyboard-close" id="mobile-keyboard-close" aria-label="Close keyboard">✕</button>
+      </div>
+      <div class="mobile-keyboard-content">
+        <div class="keyboard-section">
+          <div class="keyboard-section-title">Numbers & Basic</div>
+          <div class="keyboard-grid">
+            <button type="button" class="kb-btn" data-cmd="7">7</button>
+            <button type="button" class="kb-btn" data-cmd="8">8</button>
+            <button type="button" class="kb-btn" data-cmd="9">9</button>
+            <button type="button" class="kb-btn" data-latex="div">÷</button>
+            <button type="button" class="kb-btn" data-cmd="4">4</button>
+            <button type="button" class="kb-btn" data-cmd="5">5</button>
+            <button type="button" class="kb-btn" data-cmd="6">6</button>
+            <button type="button" class="kb-btn" data-latex="times">×</button>
+            <button type="button" class="kb-btn" data-cmd="1">1</button>
+            <button type="button" class="kb-btn" data-cmd="2">2</button>
+            <button type="button" class="kb-btn" data-cmd="3">3</button>
+            <button type="button" class="kb-btn" data-cmd="-">−</button>
+            <button type="button" class="kb-btn" data-cmd="0">0</button>
+            <button type="button" class="kb-btn" data-cmd=".">.</button>
+            <button type="button" class="kb-btn" data-cmd="=">=</button>
+            <button type="button" class="kb-btn" data-cmd="+">+</button>
+          </div>
+        </div>
+        <div class="keyboard-section">
+          <div class="keyboard-section-title">Variables & Powers</div>
+          <div class="keyboard-grid">
+            <button type="button" class="kb-btn" data-cmd="x">x</button>
+            <button type="button" class="kb-btn" data-cmd="y">y</button>
+            <button type="button" class="kb-btn" data-cmd="z">z</button>
+            <button type="button" class="kb-btn" data-latex="^">x^y</button>
+            <button type="button" class="kb-btn" data-latex="sqrt">√</button>
+            <button type="button" class="kb-btn" data-latex="frac">a/b</button>
+            <button type="button" class="kb-btn" data-cmd="(">( )</button>
+            <button type="button" class="kb-btn" data-latex="pi">π</button>
+          </div>
+        </div>
+        <div class="keyboard-section">
+          <div class="keyboard-section-title">Functions</div>
+          <div class="keyboard-grid">
+            <button type="button" class="kb-btn" data-latex="sin">sin</button>
+            <button type="button" class="kb-btn" data-latex="cos">cos</button>
+            <button type="button" class="kb-btn" data-latex="tan">tan</button>
+            <button type="button" class="kb-btn" data-latex="log">log</button>
+            <button type="button" class="kb-btn" data-latex="ln">ln</button>
+            <button type="button" class="kb-btn" data-latex="exp">exp</button>
+            <button type="button" class="kb-btn" data-latex="arcsin">arcsin</button>
+            <button type="button" class="kb-btn" data-latex="arccos">arccos</button>
+            <button type="button" class="kb-btn" data-latex="arctan">arctan</button>
+            <button type="button" class="kb-btn" data-latex="sinh">sinh</button>
+            <button type="button" class="kb-btn" data-latex="cosh">cosh</button>
+            <button type="button" class="kb-btn" data-latex="tanh">tanh</button>
+          </div>
+        </div>
+        <div class="keyboard-section">
+          <div class="keyboard-section-title">Greek & Special</div>
+          <div class="keyboard-grid">
+            <button type="button" class="kb-btn" data-latex="alpha">α</button>
+            <button type="button" class="kb-btn" data-latex="beta">β</button>
+            <button type="button" class="kb-btn" data-latex="gamma">γ</button>
+            <button type="button" class="kb-btn" data-latex="delta">δ</button>
+            <button type="button" class="kb-btn" data-latex="theta">θ</button>
+            <button type="button" class="kb-btn" data-latex="lambda">λ</button>
+            <button type="button" class="kb-btn" data-latex="mu">μ</button>
+            <button type="button" class="kb-btn" data-latex="sigma">σ</button>
+            <button type="button" class="kb-btn" data-latex="infty">∞</button>
+            <button type="button" class="kb-btn" data-latex="sum">Σ</button>
+            <button type="button" class="kb-btn" data-latex="int">∫</button>
+            <button type="button" class="kb-btn" data-latex="partial">∂</button>
+          </div>
+        </div>
+        <div class="keyboard-section">
+          <div class="keyboard-section-title">Comparison & Logic</div>
+          <div class="keyboard-grid">
+            <button type="button" class="kb-btn" data-latex="lt">&lt;</button>
+            <button type="button" class="kb-btn" data-latex="gt">&gt;</button>
+            <button type="button" class="kb-btn" data-latex="le">≤</button>
+            <button type="button" class="kb-btn" data-latex="ge">≥</button>
+            <button type="button" class="kb-btn" data-latex="ne">≠</button>
+            <button type="button" class="kb-btn" data-latex="approx">≈</button>
+            <button type="button" class="kb-btn" data-latex="pm">±</button>
+            <button type="button" class="kb-btn" data-latex="cdot">⋅</button>
+          </div>
+        </div>
+        <div class="keyboard-section">
+          <div class="keyboard-section-title">Actions</div>
+          <div class="keyboard-grid keyboard-actions">
+            <button type="button" class="kb-btn kb-action" data-action="left">←</button>
+            <button type="button" class="kb-btn kb-action" data-action="right">→</button>
+            <button type="button" class="kb-btn kb-action" data-action="backspace">⌫</button>
+            <button type="button" class="kb-btn kb-action" data-action="clear">Clear</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="graph/graph.js"></script>
