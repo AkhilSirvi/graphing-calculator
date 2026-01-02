@@ -14,52 +14,47 @@
 //d ----- c
 //case = a*8 + b*4 + c*2 + d*1
 const lookup = [
-  [],         //0
-  [[3,0]],    //1: left-bottom
-  [[0,1]],    //2: bottom-right
-  [[3,1]],    //3: left-right
-  [[2,1]],    //4: top-right
-  null,//5: two segments
-  [[2,0]],    //6: top-bottom
-  [[3,2]],    //7: left-top
-  [[3,2]],    //8: mirror of 7
-  [[2,0]],    //9: mirror of 6
-  null,//10: mirror of 5
-  [[2,1]],    //11: mirror of 4
-  [[3,1]],    //12: mirror of 3
-  [[0,1]],    //13: mirror of 2
-  [[3,0]],    //14: mirror of 1
-  []          //15
+  [], //0
+  [[3, 0]], //1: left-bottom
+  [[0, 1]], //2: bottom-right
+  [[3, 1]], //3: left-right
+  [[2, 1]], //4: top-right
+  null, //5: two segments
+  [[2, 0]], //6: top-bottom
+  [[3, 2]], //7: left-top
+  [[3, 2]], //8: mirror of 7
+  [[2, 0]], //9: mirror of 6
+  null, //10: mirror of 5
+  [[2, 1]], //11: mirror of 4
+  [[3, 1]], //12: mirror of 3
+  [[0, 1]], //13: mirror of 2
+  [[3, 0]], //14: mirror of 1
+  [], //15
 ];
 
 // Add Lanczos-based Gamma and factorial helpers and support postfix '!'
 // so expressions like (something)! become factorial(something)
-(function(){
-  window.lanczosGamma = function(z) {
-    var g = 7;
-    var C = [
-      0.99999999999980993,
-      676.5203681218851,
-      -1259.1392167224028,
-      771.32342877765313,
-      -176.61502916214059,
-      12.507343278686905,
-      -0.13857109526572012,
-      9.9843695780195716e-6,
-      1.5056327351493116e-7
-    ];
+(function () {
+  var g = 7;
+  var C = [
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+    771.32342877765313, -176.61502916214059, 12.507343278686905,
+    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7,
+  ];
+  var PI2 = Math.sqrt(2 * Math.PI);
 
+  window.lanczosGamma = function (z) {
     if (z < 0.5) {
       return Math.PI / (Math.sin(Math.PI * z) * window.lanczosGamma(1 - z));
     }
     z -= 1;
     var x = C[0];
-    for (var i = 1; i < C.length; i++) x += C[i] / (z + i);
+    for (var i = 1; i < 9; i++) x += C[i] / (z + i);
     var t = z + g + 0.5;
-    return Math.sqrt(2 * Math.PI) * Math.pow(t, (z + 0.5)) * Math.exp(-t) * x;
+    return PI2 * Math.exp((z + 0.5) * Math.log(t) - t) * x;
   };
 
-  window.factorial = function(x) {
+  window.factorial = function (x) {
     var v = Number(x);
     if (!isFinite(v)) return NaN;
     var isInt = Math.floor(v) === v;
@@ -75,23 +70,26 @@ const lookup = [
 
   // Replace postfix factorials: foo! -> factorial(foo)
   function replaceFactorials(expr) {
-    if (!expr || expr.indexOf('!') === -1) return expr;
+    if (!expr || expr.indexOf("!") === -1) return expr;
     var i = 0;
-    while ((i = expr.indexOf('!', i)) !== -1) {
+    while ((i = expr.indexOf("!", i)) !== -1) {
       var end = i;
       var start = end - 1;
-      if (expr[start] === ')') {
+      if (expr[start] === ")") {
         // find matching '('
         var depth = 0;
         while (start >= 0) {
-          if (expr[start] === ')') depth++;
-          else if (expr[start] === '(') {
+          if (expr[start] === ")") depth++;
+          else if (expr[start] === "(") {
             depth--;
             if (depth === 0) break;
           }
           start--;
         }
-        if (start < 0) { i = end + 1; continue; }
+        if (start < 0) {
+          i = end + 1;
+          continue;
+        }
       } else {
         // identifier/number/variable (letters, digits, dot, underscore)
         while (start >= 0 && /[A-Za-z0-9_.]/.test(expr[start])) start--;
@@ -100,8 +98,8 @@ const lookup = [
       var before = expr.slice(0, start);
       var operand = expr.slice(start, end);
       var after = expr.slice(end + 1);
-      expr = before + 'factorial(' + operand + ')' + after;
-      i = before.length + ('factorial(' + operand + ')').length;
+      expr = before + "factorial(" + operand + ")" + after;
+      i = before.length + ("factorial(" + operand + ")").length;
     }
     return expr;
   }
@@ -112,10 +110,10 @@ const lookup = [
 
 let m = 10000; // division of x axis
 let n = 10000; // division of y axis
-let resolution = m*n;
+let resolution = m * n;
 
-const JUMP = 0.5;        // reject massive jumps
-const ZERO_RANGE = 1;  // only care near real zero crossings
+const JUMP = 0.5; // reject massive jumps
+const ZERO_RANGE = 1; // only care near real zero crossings
 
 function goodTransition(a, b) {
   if (!isFinite(a) || !isFinite(b)) return false;
@@ -131,21 +129,46 @@ function goodTransition(a, b) {
   return true;
 }
 
-
-
 //mathematical_function_convertion(window.App.functions[0].data)
 function mathematical_function_convertion(expr) {
   // handle postfix factorials like (x)! -> factorial(x)
-  try { expr = (window._replaceFactorials && typeof window._replaceFactorials === 'function') ? window._replaceFactorials(expr) : expr; } catch (e) {}
-      if (expr.includes("=")) {
+  try {
+    expr =
+      window._replaceFactorials &&
+      typeof window._replaceFactorials === "function"
+        ? window._replaceFactorials(expr)
+        : expr;
+  } catch (e) {}
+  if (expr.includes("=")) {
     const parts = expr.split("=");
-    expr = `(${parts.slice(0,-1).join("=")})-(${parts.at(-1)})`;
+    expr = `(${parts.slice(0, -1).join("=")})-(${parts.at(-1)})`;
   }
 
-    const funcs = [
-    "sin","cos","tan","asin","acos","atan","atan2",
-    "sqrt","abs","log","log10","exp","ceil","floor","round",
-    "min","max","pow"
+  const funcs = [
+    "sin",
+    "cos",
+    "tan",
+    "asin",
+    "acos",
+    "atan",
+    "atan2",
+    "sqrt",
+    "abs",
+    "log",
+    "log10",
+    "exp",
+    "ceil",
+    "floor",
+    "round",
+    "min",
+    "max",
+    "pow",
+    "sinh",
+    "cosh",
+    "tanh",
+    "asinh",
+    "acosh",
+    "atanh",
   ];
   const funcPattern = new RegExp(`\\b(${funcs.join("|")})\\s*\\(`, "g");
   expr = expr.replace(funcPattern, "Math.$1(");
@@ -153,29 +176,25 @@ function mathematical_function_convertion(expr) {
   expr = expr.replace(/\bpi\b/gi, "Math.PI");
   expr = expr.replace(/\be\b/gi, "Math.E");
   return expr;
+}
 
-}
-function computexy(expr, x, y) {
-    const fn = new Function("x", "y", `return ${expr};`);
-    return fn(x, y);
-}
-function main(rawExpr, settings = {m: 100, n: 100, color: 'red', width: 1}) {
+function main(rawExpr, settings = { m: 100, n: 100, color: "red", width: 1 }) {
   // settings: {m, n, color, width}
   m = settings.m || m;
   n = settings.n || n;
-  const color = settings.color || 'red';
+  const color = settings.color || "red";
   const width = settings.width || 2;
 
   const expr = mathematical_function_convertion(rawExpr || "0");
   let fn;
   try {
-    fn = new Function('x', 'y', `return (${expr});`);
+    fn = new Function("x", "y", `return (${expr});`);
   } catch (e) {
-    console.error('Invalid expression', e);
+    console.error("Invalid expression", e);
     return;
   }
 
-  const graphPage = document.getElementById('new_graph_page');
+  const graphPage = document.getElementById("new_graph_page");
   // do not draw directly here; add persistent lines so redraw uses them
 
   const xmin = window.Graph.viewport.xmin;
@@ -188,8 +207,15 @@ function main(rawExpr, settings = {m: 100, n: 100, color: 'red', width: 1}) {
   // helper to compute corner function values
   const sample = (x, y) => {
     let v;
-    try { v = fn(x,y); }
-    catch { console.warn('Error: Function evaluation error'); throw Error('Function evaluation error'); return NaN; }
+    try {
+      v = fn(x, y);
+    } catch {
+      console.warn("Error: Function evaluation error");
+      throw Error("Function evaluation error");
+      return NaN;
+    }
+    if (!isFinite(v)) return NaN;
+    if (Math.abs(v) > 1e6) return NaN;
 
     if (!isFinite(v)) return NaN;
     return v;
@@ -198,11 +224,10 @@ function main(rawExpr, settings = {m: 100, n: 100, color: 'red', width: 1}) {
   // interpolation helper: find zero crossing between p1 (v1) and p2 (v2)
   const interp = (x1, y1, v1, x2, y2, v2) => {
     if (!goodTransition(v1, v2)) return null;
- if (!isFinite(v1) || !isFinite(v2)) return null;
-  if (v1 === v2) return { x:(x1+x2)/2, y:(y1+y2)/2 };
-
-  const t = v1 / (v1 - v2);
-  return { x: x1 + t*(x2-x1), y: y1 + t*(y2-y1) };
+    if (!isFinite(v1) || !isFinite(v2)) return null;
+    if (v1 === v2) return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
+    const t = v1 / (v1 - v2);
+    return { x: x1 + t * (x2 - x1), y: y1 + t * (y2 - y1) };
   };
 
   // iterate cells
@@ -221,35 +246,36 @@ function main(rawExpr, settings = {m: 100, n: 100, color: 'red', width: 1}) {
       if (!isFinite(aV) || !isFinite(bV) || !isFinite(cV) || !isFinite(dV))
         continue;
       const aBit = aV < 0 ? 1 : 0;
-const bBit = bV < 0 ? 1 : 0;
-const cBit = cV < 0 ? 1 : 0;
-const dBit = dV < 0 ? 1 : 0;
+      const bBit = bV < 0 ? 1 : 0;
+      const cBit = cV < 0 ? 1 : 0;
+      const dBit = dV < 0 ? 1 : 0;
 
       const idx = aBit * 8 + bBit * 4 + cBit * 2 + dBit * 1;
 
-let segs = lookup[idx];
+      let segs = lookup[idx];
 
-// special ambiguous cases: 5 and 10
-if (idx === 5 || idx === 10) {
-  const center = sample((x0 + x1) / 2, (y0 + y1) / 2);
+      // special ambiguous cases: 5 and 10
+      if (idx === 5 || idx === 10) {
+        const center = sample((x0 + x1) / 2, (y0 + y1) / 2);
 
-  if (idx === 5) {
-    // 0101
-    segs = center < 0
-      ? [[3,2]]  // connect left → top
-      : [[0,1]]  // connect bottom → right
-  }
+        if (idx === 5) {
+          // 0101
+          segs =
+            center < 0
+              ? [[3, 2]] // connect left → top
+              : [[0, 1]]; // connect bottom → right
+        }
 
-  if (idx === 10) {
-    // 1010
-    segs = center < 0
-      ? [[2,1]]  // top → right
-      : [[3,0]]  // left → bottom
-  }
-}
+        if (idx === 10) {
+          // 1010
+          segs =
+            center < 0
+              ? [[2, 1]] // top → right
+              : [[3, 0]]; // left → bottom
+        }
+      }
 
-if (!segs || segs.length === 0) continue;
-
+      if (!segs || segs.length === 0) continue;
 
       // edge point calculator
       const edgePoint = (edge) => {
@@ -274,7 +300,7 @@ if (!segs || segs.length === 0) continue;
         try {
           window.Graph.addLine(p1.x, p1.y, p2.x, p2.y, color, width);
         } catch (e) {
-          console.warn('add segment failed', e);
+          console.warn("add segment failed", e);
         }
       }
     }
@@ -282,42 +308,65 @@ if (!segs || segs.length === 0) continue;
 }
 
 // expose function for UI to call
-try { window.Graph.renderImplicit = main; } catch (e) {}
+try {
+  window.Graph.renderImplicit = main;
+} catch (e) {}
 
 // rebuild implicit plots from stored App.functions (used during pan/zoom redraw)
 try {
-  window.Graph.rebuildImplicit = function() {
-    try { window.Graph.clearLines(); } catch (e) {}
-    const funcs = (window.App && Array.isArray(window.App.functions)) ? window.App.functions : [];
+  window.Graph.rebuildImplicit = function () {
+    try {
+      window.Graph.clearLines();
+    } catch (e) {}
+    const funcs =
+      window.App && Array.isArray(window.App.functions)
+        ? window.App.functions
+        : [];
     funcs.forEach((func, idx) => {
       if (func && func.data && String(func.data).trim()) {
         // clear previous error for this function input (remove sibling placed below)
         try {
-          const container = document.getElementById('function_input_' + (idx + 1));
+          const container = document.getElementById(
+            "function_input_" + (idx + 1)
+          );
           if (container) {
             const next = container.nextElementSibling;
-            if (next && next.classList && next.classList.contains('fn-error')) next.remove();
+            if (next && next.classList && next.classList.contains("fn-error"))
+              next.remove();
           }
         } catch (e) {}
 
         try {
-          window.Graph.renderImplicit(func.data, { m: Math.min(500, m), n: Math.min(500, n), color: func.color, width: 2 });
+          window.Graph.renderImplicit(func.data, {
+            m: Math.min(600, m),
+            n: Math.min(600, n),
+            color: func.color,
+            width: 3,
+          });
         } catch (e) {
-          console.warn('Error: Function syntax not Defined \n' + func.data, e);
+          console.warn("Error: Function syntax not Defined \n" + func.data, e);
           try {
-            const container = document.getElementById('function_input_' + (idx + 1));
+            const container = document.getElementById(
+              "function_input_" + (idx + 1)
+            );
             if (container) {
               let err = container.nextElementSibling;
-              if (!err || !err.classList || !err.classList.contains('fn-error')) {
-                err = document.createElement('div');
-                err.className = 'fn-error';
-                err.setAttribute('role', 'alert');
-                err.style.color = '#c53030';
-                err.style.fontSize = '12px';
-                err.style.marginTop = '6px';
+              if (
+                !err ||
+                !err.classList ||
+                !err.classList.contains("fn-error")
+              ) {
+                err = document.createElement("div");
+                err.className = "fn-error";
+                err.setAttribute("role", "alert");
+                err.style.color = "#c53030";
+                err.style.fontSize = "12px";
+                err.style.marginTop = "6px";
                 container.parentNode.insertBefore(err, container.nextSibling);
               }
-              err.textContent = 'Syntax error: ' + (e && e.message ? e.message : 'Invalid expression');
+              err.textContent =
+                "Syntax error: " +
+                (e && e.message ? e.message : "Invalid expression");
             }
           } catch (ee) {}
         }

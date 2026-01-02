@@ -407,39 +407,125 @@
   }
 
   function setupPanZoom(graphPage, ctx) {
+    // Support both single-finger panning and two-finger pinch-to-zoom.
     let isPanning = false, panStart = null;
+    const pointers = new Map();
+    let isPinching = false, pinchStartDist = null, pinchStartViewport = null;
+
+    function getDistance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+    function getMidpoint(a, b) {
+      return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    }
+
     graphPage.addEventListener("pointerdown", (ev) => {
       ev.preventDefault();
       const canvas = graphPage.querySelector("canvas");
       if (!canvas) return;
-      isPanning = true;
-      panStart = { x: ev.clientX, y: ev.clientY };
+      // store pointer info (client coords)
+      pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
       canvas.setPointerCapture(ev.pointerId);
+
+      if (pointers.size >= 2) {
+        // start pinch
+        isPinching = true;
+        isPanning = false;
+        // take two pointers
+        const it = pointers.values();
+        const p1 = it.next().value;
+        const p2 = it.next().value;
+        pinchStartDist = getDistance(p1, p2);
+        pinchStartViewport = { xmin: viewport.xmin, xmax: viewport.xmax, ymin: viewport.ymin, ymax: viewport.ymax };
+      } else {
+        // single-finger pan start
+        isPanning = true;
+        panStart = { x: ev.clientX, y: ev.clientY };
+      }
     });
+
     graphPage.addEventListener("pointermove", (ev) => {
-      if (!isPanning || !panStart) return;
+      if (!pointers.has(ev.pointerId)) return;
+      // update stored pointer location
+      pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
       const canvas = graphPage.querySelector("canvas");
       if (!canvas) return;
-      const dpr = window.devicePixelRatio || 1;
-      const dx = ev.clientX - panStart.x;
-      const dy = ev.clientY - panStart.y;
-      panStart = { x: ev.clientX, y: ev.clientY };
-      const wpx = canvas.width / dpr;
-      const hpx = canvas.height / dpr;
-      const dxWorld = (-dx / wpx) * (viewport.xmax - viewport.xmin);
-      const dyWorld = (dy / hpx) * (viewport.ymax - viewport.ymin);
-      viewport.xmin += dxWorld;
-      viewport.xmax += dxWorld;
-      viewport.ymin += dyWorld;
-      viewport.ymax += dyWorld;
-      clearAndRedraw(ctx, graphPage);
+
+      if (isPinching && pointers.size >= 2) {
+        // pinch-to-zoom: compute current distance and center
+        const it = pointers.values();
+        const p1 = it.next().value;
+        const p2 = it.next().value;
+        const curDist = getDistance(p1, p2);
+        if (!pinchStartDist || pinchStartDist === 0) return;
+        const zoomFactor = curDist / pinchStartDist;
+        // compute midpoint in canvas coords and convert to world coords
+        const rect = canvas.getBoundingClientRect();
+        const mid = getMidpoint(p1, p2);
+        const px = mid.x - rect.left;
+        const py = mid.y - rect.top;
+        const { x: cx, y: cy } = pixelToWorld(ctx, px, py);
+        // scale relative to the pinch start viewport
+        const sv = pinchStartViewport;
+        let nxmin = cx + (sv.xmin - cx) / zoomFactor;
+        let nxmax = cx + (sv.xmax - cx) / zoomFactor;
+        let nymin = cy + (sv.ymin - cy) / zoomFactor;
+        let nymax = cy + (sv.ymax - cy) / zoomFactor;
+        const minSpan = 1e-12;
+        const maxSpan = 1e100;
+        const newW = Math.abs(nxmax - nxmin);
+        const newH = Math.abs(nymax - nymin);
+        if (newW < minSpan || newH < minSpan) return;
+        if (newW > maxSpan || newH > maxSpan) {
+          const halfW = maxSpan / 2;
+          nxmin = cx - halfW;
+          nxmax = cx + halfW;
+          const halfH = maxSpan / 2;
+          nymin = cy - halfH;
+          nymax = cy + halfH;
+        }
+        viewport.xmin = nxmin;
+        viewport.xmax = nxmax;
+        viewport.ymin = nymin;
+        viewport.ymax = nymax;
+        clearAndRedraw(ctx, graphPage);
+      } else if (isPanning && panStart) {
+        // single-finger pan behavior
+        const dpr = window.devicePixelRatio || 1;
+        const dx = ev.clientX - panStart.x;
+        const dy = ev.clientY - panStart.y;
+        panStart = { x: ev.clientX, y: ev.clientY };
+        const wpx = canvas.width / dpr;
+        const hpx = canvas.height / dpr;
+        const dxWorld = (-dx / wpx) * (viewport.xmax - viewport.xmin);
+        const dyWorld = (dy / hpx) * (viewport.ymax - viewport.ymin);
+        viewport.xmin += dxWorld;
+        viewport.xmax += dxWorld;
+        viewport.ymin += dyWorld;
+        viewport.ymax += dyWorld;
+        clearAndRedraw(ctx, graphPage);
+      }
     });
-    graphPage.addEventListener("pointerup", (ev) => {
+
+    function endPointer(ev) {
       const canvas = graphPage.querySelector("canvas");
-      if (canvas) canvas.releasePointerCapture(ev.pointerId);
-      isPanning = false;
-      panStart = null;
-    });
+      if (canvas) {
+        try { canvas.releasePointerCapture(ev.pointerId); } catch (e) {}
+      }
+      pointers.delete(ev.pointerId);
+      if (pointers.size < 2) {
+        isPinching = false;
+        pinchStartDist = null;
+        pinchStartViewport = null;
+      }
+      if (pointers.size === 0) {
+        isPanning = false;
+        panStart = null;
+      }
+    }
+
+    graphPage.addEventListener("pointerup", endPointer);
+    graphPage.addEventListener("pointercancel", endPointer);
 
     graphPage.addEventListener("wheel", (ev) => {
       const canvas = graphPage.querySelector("canvas");
