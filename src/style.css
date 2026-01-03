@@ -117,12 +117,12 @@ body {
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
-    max-height: 50vh;
+    max-height: 23vh;
     overflow-y: auto;
 }
 
 .mobile-keyboard.visible {
-    transform: translateY(190px);
+    transform: translateY(0);
 }
 
 .mobile-keyboard-header {
