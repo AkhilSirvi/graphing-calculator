@@ -74,6 +74,8 @@
         textarea.id = func.spanId + '-input';
         const labelId = 'label_' + func.spanId;
         textarea.setAttribute('aria-labelledby', labelId);
+        // Prevent native mobile keyboard from appearing on touch devices
+        textarea.setAttribute('inputmode', 'none');
         // When the MathQuill textarea gains focus, remember which function is active
         textarea.addEventListener('focus', () => {
           lastFocusedFunctionIndex = idx;

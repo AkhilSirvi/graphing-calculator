@@ -117,7 +117,7 @@ body {
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
-    max-height: 45vh;
+    max-height: 50vh;
     overflow-y: auto;
 }
 
@@ -129,7 +129,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-bottom: 1px solid var(--border-color);
     background: var(--tertiary-bg);
     position: sticky;
@@ -139,17 +139,17 @@ body {
 
 .mobile-keyboard-title {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 14px;
     color: var(--text-color);
 }
 
 .mobile-keyboard-close {
     background: transparent;
     border: none;
-    font-size: 24px;
+    font-size: 20px;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 2px 6px;
     line-height: 1;
     border-radius: var(--radius-sm);
     transition: all 0.2s;
@@ -161,11 +161,11 @@ body {
 }
 
 .mobile-keyboard-content {
-    padding: 10px;
+    padding: 6px;
 }
 
 .keyboard-section {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .keyboard-section:last-child {
@@ -173,18 +173,18 @@ body {
 }
 
 .keyboard-section-title {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .keyboard-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
 }
 
 .keyboard-actions {
@@ -192,11 +192,11 @@ body {
 }
 
 .kb-btn {
-    padding: 10px 6px;
+    padding: 6px 3px;
     background: var(--tertiary-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-color);
     cursor: pointer;
@@ -205,7 +205,7 @@ body {
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    min-height: 42px;
+    min-height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -260,22 +260,22 @@ body {
 
 @media (max-width: 767px) {
     .keyboard-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 5px;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 3px;
     }
     
     .kb-btn {
-        padding: 8px 4px;
-        font-size: 13px;
-        min-height: 38px;
+        padding: 6px 2px;
+        font-size: 11px;
+        min-height: 32px;
     }
     
     .mobile-keyboard-content {
-        padding: 8px;
+        padding: 5px;
     }
     
     .keyboard-section {
-        margin-bottom: 10px;
+        margin-bottom: 6px;
     }
 }
 
