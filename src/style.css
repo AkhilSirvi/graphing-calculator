@@ -122,7 +122,7 @@ body {
 }
 
 .mobile-keyboard.visible {
-    transform: translateY(0);
+    transform: translateY(190px);
 }
 
 .mobile-keyboard-header {
