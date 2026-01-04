@@ -53,7 +53,7 @@
           window.Graph.clearAndRedraw(ctx, graphPage);
         }
       };
-      newColorPicker.addEventListener('input', (e) => applyNewColor(e.target.value));
+      // Apply color only when the user finishes picking (on 'change')
       newColorPicker.addEventListener('change', (e) => applyNewColor(e.target.value));
     }
   }
@@ -103,7 +103,7 @@
           window.Graph.clearAndRedraw(ctx, graphPage);
         }
       };
-      colorPicker.addEventListener('input', (e) => applyColor(e.target.value));
+      // Apply color only when the user finishes picking (on 'change')
       colorPicker.addEventListener('change', (e) => applyColor(e.target.value));
     }
   });

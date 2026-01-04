@@ -183,7 +183,7 @@ body {
 
 .keyboard-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(9, 1fr);
     gap: 4px;
 }
 
@@ -260,7 +260,7 @@ body {
 
 @media (max-width: 767px) {
     .keyboard-grid {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(9, 1fr);
         gap: 3px;
     }
     
@@ -303,7 +303,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 20px;
+    padding: 12px;
     border-right: 1px solid var(--border-color);
     overflow-y: auto;
 }
@@ -395,7 +395,7 @@ body {
 .fn-label-wrapper {
     display: flex;
     align-items: center;
-    padding: 0 12px;
+    padding: 0 4px;
     background: var(--secondary-bg);
     border-right: 1px solid var(--border-color);
     min-width: 60px;
@@ -432,7 +432,7 @@ body {
 .fn-color-picker-wrapper {
     display: flex;
     align-items: center;
-    padding: 0 12px;
+    padding: 0 4px;
     background: var(--secondary-bg);
     border-left: 1px solid var(--border-color);
 }
