@@ -70,22 +70,7 @@ Developer notes
 - UI wiring and MathQuill hooks are in `src/script.js`.
 - Third-party libraries are under `lib/` and listed in `THIRD-PARTY-LICENSES.md`.
 
-Styling and accessibility
--------------------------
-- Function inputs include keyboard-accessible MathQuill editors; color pickers update the associated function indicator immediately and are accessible via `aria-label` attributes.
-- Per-function syntax errors are rendered beneath each function input using an element with the class `.fn-error` (role set to `alert`). You can style it in `src/style.css`.
-
-Extending the project
----------------------
-- Add a dedicated overlay canvas for labels and interactive handles if you need high-frequency updates without redrawing the main grid.
-- Add more parser rules or a small expression sandbox if you want advanced mathematical constructs (matrices, symbolic manipulation).
-
 License & third-party
 ---------------------
 See `THIRD-PARTY-LICENSES.md` for licensing information about bundled libraries.
-
-If you'd like, I can:
-- Add a short demo page that preloads example functions.
-- Add a small UI to list/remove overlays.
-- Improve error messages with quick-fix suggestions for common mistakes.
 
